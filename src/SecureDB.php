@@ -154,3 +154,5 @@ class SecureDB
         $this->conn = null;
     }
 }
+
+?>
