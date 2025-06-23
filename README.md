@@ -84,12 +84,14 @@ $db->insertMultiple('users', $rows); // Auto-batched and transactional
 ### 🔹 Update
 
 ```php
+$db->update( $table_name, array $update_data, array $where)
 $db->update('users', ['name' => 'Updated'], ['id' => 5]);
 ```
 
 ### 🔹 Delete
 
 ```php
+$db->delete($table_name, array $where)
 $db->delete('users', ['id' => 5]);
 ```
 
