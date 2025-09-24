@@ -87,6 +87,20 @@ $db->insertMultiple('users', $rows); // Auto-batched and transactional
 $db->update( $table_name, array $update_data, array $where);
 
 $db->update('users', ['name' => 'Updated'], ['id' => 5]);
+
+
+// Update with fluent interface
+$db->update('users')->where(['id' => 5])->change(['name' => 'Updated', 'email' => 'code@gmail.com']);
+
+// Multiple Column Updates:
+$db->update('users')->where(['id' => 5])->change([
+    'name' => 'Updated Name',
+    'email' => 'newemail@gmail.com',
+    'status' => 'active',
+    'last_login' => '2025-09-23 10:30:00'
+]);
+
+
 ```
 
 ### 🔹 Delete
@@ -95,6 +109,24 @@ $db->update('users', ['name' => 'Updated'], ['id' => 5]);
 $db->delete($table_name, array $where);
 
 $db->delete('users', ['id' => 5]);
+
+// Single Condition Delete:
+$db->delete('users')->where(['id' => 5]);
+
+Multiple Conditions Delete:
+$db->delete('users')->where([
+    'id' => 5,
+    'status' => 'inactive',
+    'last_login' => null
+]);
+
+How It Works:
+The where() method accepts an array of $conditions
+Uses array_keys($this->fluentWhere) to get all column names
+Creates WHERE clause: id = :id AND status = :status AND last_login = :last_login
+All conditions are joined with AND operators
+Uses PDO prepared statements for security
+
 ```
 
 ### 🔹 Raw Query
