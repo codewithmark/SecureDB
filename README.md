@@ -15,26 +15,15 @@
 
 ## 🛠 Installation
 
-**Option 1: Manual**
+** Manual**
 
-- Download `SecureDB.php` from `/src`
+- Download `SecureDB.php`
 - Require it in your PHP code:
 
 ```php
-require_once 'src/SecureDB.php';
+require_once 'SecureDB.php';
 ```
-
-**Option 2: Composer**
-
-```bash
-composer require yourname/secure-db
-```
-
-Then autoload with:
-
-```php
-require 'vendor/autoload.php';
-```
+ 
 
 ---
 
