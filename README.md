@@ -102,6 +102,7 @@ for ($i = 0; $i < 50000; $i++) {
 // Processes in chunks of 2000 for optimal performance
 $total = $db->insertMultiple('users')->batch(2000)->rows($largeDataset);
 
+
 ```
 
 ### 🔹 Update
@@ -119,6 +120,8 @@ $db->update('users')->where(['id' => 5])->change([
     'status' => 'active',
     'last_login' => '2025-09-23 10:30:00'
 ]);
+
+
 ```
 
 ### 🔹 Delete
@@ -144,15 +147,52 @@ Creates WHERE clause: id = :id AND status = :status AND last_login = :last_login
 All conditions are joined with AND operators
 Uses PDO prepared statements for security
 
+
 ```
 
 ### 🔹 Raw Query
 
 ```php
-$db->query("UPDATE settings SET value = :v WHERE name = :n", [
-  'v' => 'off',
-  'n' => 'maintenance'
+
+//SELECT  
+$db->query('SELECT * FROM users WHERE status = :status', ['status' => 'active']);
+// Returns: Array of result rows
+
+//INSERT
+$db->query('INSERT INTO users (name, email) VALUES (:name, :email)', [
+    'name' => 'John Doe',
+    'email' => 'john@example.com'
 ]);
+// Returns: Last insert ID (int)
+
+//UPDATE
+ $db->query('UPDATE users SET status = :status WHERE id = :id', [
+    'status' => 'inactive',
+    'id' => 5
+]);
+// Returns: Number of affected rows (int)
+
+//DELETE
+$db->query('DELETE FROM users WHERE last_login < :date', [
+    'date' => '2024-01-01'
+]);
+// Returns: Number of deleted rows (int)
+
+//DDL Statements (CREATE, ALTER, DROP, etc.)
+$db->query('CREATE INDEX idx_user_email ON users(email)');
+// Returns: true (bool)
+
+
+//Complex Query Support
+// JOIN queries with parameters
+$data = $db->query('
+    SELECT u.name, u.email, p.title as role 
+    FROM users u 
+    LEFT JOIN profiles p ON u.id = p.user_id 
+    WHERE u.created_at > :date AND u.status = :status
+', ['date' => '2025-01-01', 'status' => 'active']); 
+
+
 ```
 
 ---
