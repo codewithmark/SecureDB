@@ -169,10 +169,45 @@ class SecureDB
         return $this;
     }
 
-    public function query(string $sql, array $params = []): bool
+    public function query(string $sql, array $params = []): mixed
     {
-        $this->prepareAndExecute($sql, $params);
-        return true;
+        $stmt = $this->prepareAndExecute($sql, $params);
+        
+        // Determine the query type by examining the SQL statement
+        $queryType = $this->detectQueryType($sql);
+        
+        switch ($queryType) {
+            case 'SELECT':
+                return $stmt->fetchAll();
+                
+            case 'INSERT':
+                return (int) $this->conn->lastInsertId();
+                
+            case 'UPDATE':
+            case 'DELETE':
+                return $stmt->rowCount();
+                
+            default:
+                // For other statements (CREATE, ALTER, DROP, etc.)
+                return true;
+        }
+    }
+    
+    /**
+     * Detect the type of SQL query
+     */
+    private function detectQueryType(string $sql): string
+    {
+        // Remove leading whitespace and comments
+        $sql = trim($sql);
+        $sql = preg_replace('/^\/\*.*?\*\/\s*/s', '', $sql); // Remove /* */ comments
+        $sql = preg_replace('/^--.*$/m', '', $sql); // Remove -- comments
+        $sql = trim($sql);
+        
+        // Get the first word (the SQL command)
+        $firstWord = strtoupper(explode(' ', $sql)[0]);
+        
+        return $firstWord;
     }
 
     /**
