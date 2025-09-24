@@ -9,6 +9,7 @@ class SecureDB
     private string $fluentTable = '';
     private array $fluentWhere = [];
     private array $fluentData = [];
+    private int $fluentBatchSize = 1000;
 
     private function __construct(array $config)
     {
@@ -49,18 +50,43 @@ class SecureDB
         return $stmt->fetchAll();
     }
 
-    public function insert(string $table, array $data): int
+    public function insert(string $table, array $data = []): int|self
     {
-        $columns = implode(', ', array_keys($data));
-        $placeholders = ':' . implode(', :', array_keys($data));
+        // If data is provided, execute immediately (backward compatibility)
+        if (!empty($data)) {
+            $columns = implode(', ', array_keys($data));
+            $placeholders = ':' . implode(', :', array_keys($data));
 
-        $sql = "INSERT INTO `$table` ($columns) VALUES ($placeholders)";
-        $this->prepareAndExecute($sql, $data);
+            $sql = "INSERT INTO `$table` ($columns) VALUES ($placeholders)";
+            $this->prepareAndExecute($sql, $data);
 
-        return (int) $this->conn->lastInsertId();
+            return (int) $this->conn->lastInsertId();
+        }
+        
+        // Fluent interface mode
+        $this->reset();
+        $this->fluentTable = $table;
+        return $this;
     }
 
-    public function insertMultiple(string $table, array $rows, int $batchSize = 1000): int
+    public function insertMultiple(string $table, array $rows = [], int $batchSize = 1000): int|self
+    {
+        // If rows are provided, execute immediately (backward compatibility)
+        if (!empty($rows)) {
+            return $this->executeInsertMultiple($table, $rows, $batchSize);
+        }
+        
+        // Fluent interface mode
+        $this->reset();
+        $this->fluentTable = $table;
+        $this->fluentBatchSize = $batchSize;
+        return $this;
+    }
+
+    /**
+     * Execute bulk insert operation
+     */
+    private function executeInsertMultiple(string $table, array $rows, int $batchSize): int
     {
         if (empty($rows)) {
             throw new Exception("No rows provided for bulk insert.");
@@ -147,6 +173,59 @@ class SecureDB
     {
         $this->prepareAndExecute($sql, $params);
         return true;
+    }
+
+    /**
+     * Set batch size for fluent insertMultiple
+     */
+    public function batch(int $size): self
+    {
+        $this->fluentBatchSize = $size;
+        return $this;
+    }
+
+    /**
+     * Execute bulk INSERT with stored table and provided rows data
+     */
+    public function rows(array $rows): int
+    {
+        if (empty($this->fluentTable)) {
+            throw new Exception("No table specified. Use insertMultiple('table_name') first.");
+        }
+        
+        if (empty($rows)) {
+            throw new Exception("No rows data provided for bulk insert.");
+        }
+
+        $totalInserted = $this->executeInsertMultiple($this->fluentTable, $rows, $this->fluentBatchSize);
+        $this->reset(); // Clear fluent state after execution
+        
+        return $totalInserted;
+    }
+
+    /**
+     * Execute INSERT with stored table and provided data
+     */
+    public function row(array $data): int
+    {
+        if (empty($this->fluentTable)) {
+            throw new Exception("No table specified. Use insert('table_name') first.");
+        }
+        
+        if (empty($data)) {
+            throw new Exception("No data provided for insert.");
+        }
+
+        $columns = implode(', ', array_keys($data));
+        $placeholders = ':' . implode(', :', array_keys($data));
+
+        $sql = "INSERT INTO `{$this->fluentTable}` ($columns) VALUES ($placeholders)";
+        $this->prepareAndExecute($sql, $data);
+        
+        $lastId = (int) $this->conn->lastInsertId();
+        $this->reset(); // Clear fluent state after execution
+        
+        return $lastId;
     }
 
     /**
@@ -238,6 +317,7 @@ class SecureDB
         $this->fluentTable = '';
         $this->fluentWhere = [];
         $this->fluentData = [];
+        $this->fluentBatchSize = 1000;
     }
 
     public function escape(string $value): string
