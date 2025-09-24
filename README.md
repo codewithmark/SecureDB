@@ -59,7 +59,7 @@ $db->insert('users', [
   'email' => 'alice@example.com'
 ]);
 
-//Insert Fluent Interface Added
+//Insert Fluent Interface
 $db->insert('users')->row([
     'name' => 'Alice',
     'email' => 'alice@example.com'
