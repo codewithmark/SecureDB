@@ -169,6 +169,30 @@ class SecureDB
         return $this;
     }
 
+    public function q(string $sql, array $params = []): mixed
+    {
+        $stmt = $this->prepareAndExecute($sql, $params);
+        
+        // Determine the query type by examining the SQL statement
+        $queryType = $this->detectQueryType($sql);
+        
+        switch ($queryType) {
+            case 'SELECT':
+                return $stmt->fetchAll();
+                
+            case 'INSERT':
+                return (int) $this->conn->lastInsertId();
+                
+            case 'UPDATE':
+            case 'DELETE':
+                return $stmt->rowCount();
+                
+            default:
+                // For other statements (CREATE, ALTER, DROP, etc.)
+                return true;
+        }
+    }
+    
     public function query(string $sql, array $params = []): mixed
     {
         $stmt = $this->prepareAndExecute($sql, $params);
