@@ -53,7 +53,8 @@ $users = $db->select("SELECT * FROM users WHERE role = :role", [
 ### 🔹 Insert One
 
 ```php
-$id = $db->insert('users', [
+//Insert Basic
+$db->insert('users', [
   'name' => 'Alice',
   'email' => 'alice@example.com'
 ]);
