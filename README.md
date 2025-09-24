@@ -182,8 +182,7 @@ $db->query('DELETE FROM users WHERE last_login < :date', [
 $db->query('CREATE INDEX idx_user_email ON users(email)');
 // Returns: true (bool)
 
-
-//Complex Query Support
+ 
 // JOIN queries with parameters
 $data = $db->query('
     SELECT u.name, u.email, p.title as role 
