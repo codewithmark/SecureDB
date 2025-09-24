@@ -1,5 +1,5 @@
 <h1 align="center">🔐 SecureDB</h1>
-<p align="center">A clean, fast, secure PDO database class for PHP</p>
+<p align="center">A clean, fast, secure PDO database class for PHP</p> 
  
 ---
 
