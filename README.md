@@ -77,12 +77,8 @@ $rows = [
 
 $db->insertMultiple('users', $rows); // Auto-batched and transactional
 
-//Bulk Insert Fluent Interface
 
-$rows = [
-    ['name' => 'Bob', 'email' => 'bob@example.com'],
-    ['name' => 'Carol', 'email' => 'carol@example.com'],
-];
+//Bulk Insert Fluent Interface
 
 //Basic Usage (Auto-batched at 1000):
 $totalInserted = $db->insertMultiple('users')->rows($rows);
@@ -111,23 +107,18 @@ $total = $db->insertMultiple('users')->batch(2000)->rows($largeDataset);
 ### 🔹 Update
 
 ```php
+// Update Basic
 $db->update( $table_name, array $update_data, array $where);
-
 $db->update('users', ['name' => 'Updated'], ['id' => 5]);
 
 
-// Update with fluent interface
-$db->update('users')->where(['id' => 5])->change(['name' => 'Updated', 'email' => 'code@gmail.com']);
-
-// Multiple Column Updates:
+// Update with fluent interface >  Multiple Column Updates:
 $db->update('users')->where(['id' => 5])->change([
     'name' => 'Updated Name',
     'email' => 'newemail@gmail.com',
     'status' => 'active',
     'last_login' => '2025-09-23 10:30:00'
 ]);
-
-
 ```
 
 ### 🔹 Delete
@@ -148,8 +139,7 @@ $db->delete('users')->where([
 ]);
 
 How It Works:
-The where() method accepts an array of $conditions
-Uses array_keys($this->fluentWhere) to get all column names
+The where() method accepts an array of conditions
 Creates WHERE clause: id = :id AND status = :status AND last_login = :last_login
 All conditions are joined with AND operators
 Uses PDO prepared statements for security
