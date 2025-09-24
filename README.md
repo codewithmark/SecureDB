@@ -155,10 +155,15 @@ Uses PDO prepared statements for security
 ```php
 
 //SELECT  
+$db->q('SELECT * FROM users WHERE status = :status', ['status' => 'active']);
 $db->query('SELECT * FROM users WHERE status = :status', ['status' => 'active']);
 // Returns: Array of result rows
 
 //INSERT
+$db->q('INSERT INTO users (name, email) VALUES (:name, :email)', [
+    'name' => 'John Doe',
+    'email' => 'john@example.com'
+]);
 $db->query('INSERT INTO users (name, email) VALUES (:name, :email)', [
     'name' => 'John Doe',
     'email' => 'john@example.com'
@@ -166,24 +171,41 @@ $db->query('INSERT INTO users (name, email) VALUES (:name, :email)', [
 // Returns: Last insert ID (int)
 
 //UPDATE
- $db->query('UPDATE users SET status = :status WHERE id = :id', [
+$db->q('UPDATE users SET status = :status WHERE id = :id', [
+    'status' => 'inactive',
+    'id' => 5
+]);
+
+$db->query('UPDATE users SET status = :status WHERE id = :id', [
     'status' => 'inactive',
     'id' => 5
 ]);
 // Returns: Number of affected rows (int)
 
 //DELETE
+$db->q('DELETE FROM users WHERE last_login < :date', [
+    'date' => '2024-01-01'
+]);
+
 $db->query('DELETE FROM users WHERE last_login < :date', [
     'date' => '2024-01-01'
 ]);
 // Returns: Number of deleted rows (int)
 
 //DDL Statements (CREATE, ALTER, DROP, etc.)
+$db->q('CREATE INDEX idx_user_email ON users(email)');
 $db->query('CREATE INDEX idx_user_email ON users(email)');
 // Returns: true (bool)
 
  
 // JOIN queries with parameters
+$db->q('
+    SELECT u.name, u.email, p.title as role 
+    FROM users u 
+    LEFT JOIN profiles p ON u.id = p.user_id 
+    WHERE u.created_at > :date AND u.status = :status
+', ['date' => '2025-01-01', 'status' => 'active']); 
+
 $data = $db->query('
     SELECT u.name, u.email, p.title as role 
     FROM users u 
